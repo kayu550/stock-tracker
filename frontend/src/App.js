@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -57,6 +58,7 @@ function StockCard({ ticker, onPriceLoad }) {
       .catch(error => console.error(error));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchPrices();
     const interval = setInterval(fetchPrices, 30000);

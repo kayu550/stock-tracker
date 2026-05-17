@@ -1,5 +1,7 @@
 # Stock & Crypto Tracker
 
+🔗 **Live Demo**: https://stock-tracker-omega-nine.vercel.app
+
 A full-stack real-time data pipeline and dashboard tracking live stock and cryptocurrency prices.
 
 ![Dashboard](https://img.shields.io/badge/Status-Live-green) ![Python](https://img.shields.io/badge/Python-3.12-blue) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
