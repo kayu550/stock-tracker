@@ -5,6 +5,8 @@ import {
   ComposedChart, Line, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+const API_URL = 'https://stock-tracker-production-01e7.up.railway.app';
+
 
 // ── Market Summary Bar ────────────────────────────────────────────────────────
 function MarketSummary({ allPrices }) {
@@ -48,7 +50,7 @@ function StockCard({ ticker, onPriceLoad }) {
   const [prices, setPrices] = useState([]);
 
   const fetchPrices = () => {
-    axios.get(`http://127.0.0.1:8000/stocks/${ticker}/prices`)
+    axios.get(`${API_URL}/stocks/${ticker}/prices`)
       .then(response => {
         setPrices(response.data);
         const sorted = [...response.data].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -145,7 +147,7 @@ function App() {
     setAllPrices(prev => ({ ...prev, [ticker]: { latest } }));
   };
 
-  const tickers = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'BTC-USD', 'ETH-USD', 'SOL-USD'];
+  const tickers = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'NVDA', 'AMD', 'AMZN', 'META', 'NFLX', 'BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'BNB-USD', 'DOGE-USD'];
   const summaryReady = Object.keys(allPrices).length === tickers.length;
 
   return (
@@ -162,12 +164,20 @@ function App() {
           <StockCard ticker="TSLA" onPriceLoad={handlePriceLoad} />
           <StockCard ticker="GOOGL" onPriceLoad={handlePriceLoad} />
           <StockCard ticker="MSFT" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="NVDA" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="AMD" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="AMZN" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="META" onPriceLoad={handlePriceLoad} />
+         <StockCard ticker="NFLX" onPriceLoad={handlePriceLoad} />
         </div>
         <div style={{ flex: 1 }}>
           <h2 style={{ color: '#94a3b8', fontSize: '14px', letterSpacing: '2px', marginBottom: '12px' }}>CRYPTO</h2>
           <StockCard ticker="BTC-USD" onPriceLoad={handlePriceLoad} />
           <StockCard ticker="ETH-USD" onPriceLoad={handlePriceLoad} />
           <StockCard ticker="SOL-USD" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="XRP-USD" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="BNB-USD" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="DOGE-USD" onPriceLoad={handlePriceLoad} />
         </div>
       </div>
     </div>

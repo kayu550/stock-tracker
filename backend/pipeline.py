@@ -26,7 +26,7 @@ def run_pipeline():
         for stock in stocks:
             print(f"Fetching data for {stock.ticker}...")
             ticker_data = yf.Ticker(stock.ticker)
-            history = ticker_data.history(period="5d")
+            history = ticker_data.history(period="5y")
 
             for date, row in history.iterrows():
                 existing = db.query(models.PriceHistory).filter(
