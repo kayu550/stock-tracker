@@ -5,8 +5,18 @@ import {
   ComposedChart, Line, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+
 const API_URL = 'https://stock-tracker-production-01e7.up.railway.app';
 
+// ── Time range config ─────────────────────────────────────────────────────────
+const RANGES = [
+  { label: '1W', days: 7 },
+  { label: '1M', days: 30 },
+  { label: '3M', days: 90 },
+  { label: '1Y', days: 365 },
+  { label: '3Y', days: 1095 },
+  { label: '5Y', days: 1825 },
+];
 
 // ── Market Summary Bar ────────────────────────────────────────────────────────
 function MarketSummary({ allPrices }) {
@@ -48,6 +58,7 @@ function MarketSummary({ allPrices }) {
 // ── Stock Card ────────────────────────────────────────────────────────────────
 function StockCard({ ticker, onPriceLoad }) {
   const [prices, setPrices] = useState([]);
+  const [range, setRange] = useState('1M');
 
   const fetchPrices = () => {
     axios.get(`${API_URL}/stocks/${ticker}/prices`)
@@ -60,20 +71,25 @@ function StockCard({ ticker, onPriceLoad }) {
       .catch(error => console.error(error));
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchPrices();
     const interval = setInterval(fetchPrices, 30000);
     return () => clearInterval(interval);
   }, [ticker]);
 
-  const sorted = [...prices]
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(-10);
+  // Filter by selected range
+  const selectedDays = RANGES.find(r => r.label === range)?.days || 30;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - selectedDays);
 
-  const latest = sorted[sorted.length - 1];
+  const filtered = [...prices]
+    .filter(p => new Date(p.date) >= cutoff)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const chartData = sorted.map(p => ({
+  const allSorted = [...prices].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const latest = allSorted[allSorted.length - 1];
+
+  const chartData = filtered.map(p => ({
     date: new Date(p.date).toLocaleDateString(),
     close: p.close,
     open: p.open,
@@ -90,6 +106,7 @@ function StockCard({ ticker, onPriceLoad }) {
       margin: '0 0 16px 0', width: '100%', backgroundColor: '#1e293b',
       boxShadow: '0 2px 8px rgba(0,0,0,0.3)', boxSizing: 'border-box',
     }}>
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ margin: '0', fontSize: '24px', color: '#f1f5f9' }}>{ticker}</h2>
         {latest && (
@@ -112,11 +129,35 @@ function StockCard({ ticker, onPriceLoad }) {
           <p style={{ color: '#94a3b8', margin: '4px 0' }}>Volume: {latest.volume?.toLocaleString()}</p>
           <p style={{ color: '#94a3b8', margin: '4px 0' }}>{new Date(latest.date).toLocaleDateString()}</p>
 
-          <div style={{ marginTop: '24px' }}>
+          {/* Time range buttons */}
+          <div style={{ display: 'flex', gap: '6px', marginTop: '16px', marginBottom: '8px' }}>
+            {RANGES.map(r => (
+              <button
+                key={r.label}
+                onClick={() => setRange(r.label)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  backgroundColor: range === r.label ? '#7c3aed' : '#334155',
+                  color: range === r.label ? '#fff' : '#94a3b8',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Chart */}
+          <div style={{ marginTop: '8px' }}>
             <ResponsiveContainer width="100%" height={220}>
               <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8' }} interval="preserveStartEnd" />
                 <YAxis yAxisId="price" domain={['auto', 'auto']} tick={{ fontSize: 10, fill: '#94a3b8' }} />
                 <YAxis yAxisId="volume" orientation="right" tick={{ fontSize: 8, fill: '#475569' }} tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
                 <Tooltip
@@ -168,7 +209,7 @@ function App() {
           <StockCard ticker="AMD" onPriceLoad={handlePriceLoad} />
           <StockCard ticker="AMZN" onPriceLoad={handlePriceLoad} />
           <StockCard ticker="META" onPriceLoad={handlePriceLoad} />
-         <StockCard ticker="NFLX" onPriceLoad={handlePriceLoad} />
+          <StockCard ticker="NFLX" onPriceLoad={handlePriceLoad} />
         </div>
         <div style={{ flex: 1 }}>
           <h2 style={{ color: '#94a3b8', fontSize: '14px', letterSpacing: '2px', marginBottom: '12px' }}>CRYPTO</h2>
